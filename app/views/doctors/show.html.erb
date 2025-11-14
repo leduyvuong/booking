@@ -1,0 +1,13 @@
+<div class="space-y-6">
+  <section class="bg-white shadow rounded-xl p-6">
+    <h1 class="text-2xl font-semibold text-slate-800"><%= @doctor.name %></h1>
+    <p class="text-slate-600"><%= @doctor.specialty %></p>
+    <p class="mt-2 text-sm text-slate-500">Clinic: <%= link_to @doctor.clinic.name, @doctor.clinic, class: "hover:text-blue-600" %></p>
+    <p class="mt-4 text-sm text-slate-600"><%= @doctor.bio %></p>
+  </section>
+
+  <section class="bg-white shadow rounded-xl p-6">
+    <h2 class="text-xl font-semibold text-slate-800 mb-4">Upcoming availability</h2>
+    <%= render partial: "time_slots/table", locals: { time_slots: @doctor.time_slots.available.ordered } %>
+  </section>
+</div>

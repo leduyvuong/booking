@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Clinic Booking</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "tailwind", "inter-font", "data-turbo-track": "reload" %>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-slate-50 min-h-screen">
+    <header class="bg-white shadow">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex items-center justify-between h-16">
+          <div class="flex items-center space-x-3">
+            <%= link_to root_path, class: "flex items-center space-x-2 text-blue-600 font-semibold" do %>
+              <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-600 text-white font-bold">CB</span>
+              <span>Clinic Booking</span>
+            <% end %>
+          </div>
+          <div class="hidden md:flex space-x-6 text-sm font-medium text-slate-600">
+            <%= link_to "Clinics", clinics_path, class: "hover:text-blue-600 transition" %>
+            <%= link_to "Doctors", doctors_path, class: "hover:text-blue-600 transition" %>
+            <%= link_to "Appointments", appointments_path, class: "hover:text-blue-600 transition" %>
+          </div>
+          <div class="flex items-center space-x-4 text-sm">
+            <% if user_signed_in? %>
+              <div class="text-slate-700">
+                Signed in as <span class="font-semibold"><%= current_user.email %></span>
+              </div>
+              <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition" %>
+            <% else %>
+              <%= link_to "Sign In", new_user_session_path, class: "px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition" %>
+            <% end %>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <% if notice.present? %>
+        <div class="mb-6 rounded-md bg-green-100 border border-green-200 text-green-800 px-4 py-3"><%= notice %></div>
+      <% end %>
+      <% if alert.present? %>
+        <div class="mb-6 rounded-md bg-red-100 border border-red-200 text-red-800 px-4 py-3"><%= alert %></div>
+      <% end %>
+      <%= yield %>
+    </main>
+  </body>
+</html>
