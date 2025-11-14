@@ -1,0 +1,145 @@
+<div class="space-y-6" data-controller="cancel-modal">
+  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div>
+      <h1 class="text-2xl font-semibold text-slate-900">Appointments</h1>
+      <p class="mt-1 text-sm text-slate-500">Review bookings, confirm attendance, and manage cancellations.</p>
+    </div>
+    <div class="flex items-center space-x-3">
+      <%= link_to "Export CSV", admin_appointments_path(format: :csv, filter: @filter.to_h, page: nil), class: "inline-flex items-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" %>
+    </div>
+  </div>
+
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= form_with url: admin_appointments_path, method: :get, local: true, class: "grid gap-4 md:grid-cols-5 md:items-end" do |form| %>
+      <div>
+        <%= form.label :doctor_id, "Doctor", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+        <%= form.collection_select :doctor_id, @doctors, :id, :name, { include_blank: "All", selected: @filter[:doctor_id] }, class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+      </div>
+      <div>
+        <%= form.label :status, class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+        <%= form.select :status, @statuses.map { |status| [status.titleize, status] }, { include_blank: "All", selected: @filter[:status] }, class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+      </div>
+      <div>
+        <%= form.label :start_date, "From", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+        <%= form.date_field :start_date, value: @filter[:start_date], class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+      </div>
+      <div>
+        <%= form.label :end_date, "To", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+        <%= form.date_field :end_date, value: @filter[:end_date], class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+      </div>
+      <div class="flex space-x-2">
+        <%= form.submit "Filter", class: "inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700" %>
+        <%= link_to "Reset", admin_appointments_path, class: "inline-flex items-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" %>
+      </div>
+    <% end %>
+  </div>
+
+  <%= form_with url: bulk_update_admin_appointments_path, method: :post, local: true do |form| %>
+    <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" data-controller="select-all">
+      <table class="min-w-full divide-y divide-slate-200 text-sm">
+        <thead class="bg-slate-50">
+          <tr class="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+            <th class="px-4 py-3 w-12">
+              <input type="checkbox" data-select-all-target="source" data-action="select-all#toggleAll" class="rounded border-slate-300 text-slate-900 focus:ring-slate-500" />
+            </th>
+            <th class="px-4 py-3">Booking #</th>
+            <th class="px-4 py-3">Patient</th>
+            <th class="px-4 py-3">Doctor</th>
+            <th class="px-4 py-3">Date &amp; time</th>
+            <th class="px-4 py-3">Status</th>
+            <th class="px-4 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 bg-white">
+          <% @appointments.each do |appointment| %>
+            <tr class="hover:bg-slate-50">
+              <td class="px-4 py-3">
+                <% unless appointment.cancelled? %>
+                  <%= check_box_tag "appointment_ids[]", appointment.id, false, data: { select_all_target: "item" }, class: "rounded border-slate-300 text-slate-900 focus:ring-slate-500" %>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 font-mono text-xs text-slate-500"><%= appointment.booking_number %></td>
+              <td class="px-4 py-3 text-sm text-slate-700">
+                <div class="font-medium"><%= appointment.patient_name %></div>
+                <div class="text-xs text-slate-500"><%= appointment.patient_email %></div>
+              </td>
+              <td class="px-4 py-3 text-sm text-slate-700"><%= appointment.time_slot&.doctor&.name %></td>
+              <td class="px-4 py-3 text-sm text-slate-700">
+                <% slot = appointment.time_slot %>
+                <% if slot %>
+                  <div><%= slot.date.strftime('%b %d, %Y') %></div>
+                  <div class="text-xs text-slate-500"><%= slot.start_time.strftime('%H:%M') %> - <%= slot.end_time.strftime('%H:%M') %></div>
+                <% else %>
+                  <span class="text-xs text-slate-400">Slot removed</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3">
+                <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium <%= status_badge_classes(appointment.status) %>"><%= appointment.status.titleize %></span>
+              </td>
+              <td class="px-4 py-3 text-right text-sm font-medium">
+                <div class="inline-flex items-center space-x-2">
+                  <%= link_to "View", admin_appointment_path(appointment), class: "text-slate-600 hover:text-slate-900" %>
+                  <% if appointment.pending? %>
+                    <%= link_to "Confirm", admin_appointment_path(appointment, appointment: { status: :confirmed }), data: { turbo_method: :patch }, class: "text-emerald-600 hover:text-emerald-700" %>
+                  <% end %>
+                  <% unless appointment.cancelled? %>
+                    <button type="button" class="text-rose-600 hover:text-rose-700" data-action="cancel-modal#open" data-patient-name="<%= appointment.patient_name %>" data-cancel-url="<%= cancel_admin_appointment_path(appointment) %>">
+                      Cancel
+                    </button>
+                  <% end %>
+                </div>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="mt-4 flex items-center justify-between">
+      <div class="text-sm text-slate-500">
+        Page <%= @current_page %> of <%= [@total_pages, 1].max %> · <%= pluralize(@total_count, "appointment") %>
+      </div>
+      <div class="flex items-center space-x-2">
+        <% prev_page = @current_page - 1 %>
+        <% next_page = @current_page + 1 %>
+        <% if @current_page > 1 %>
+          <%= link_to "Previous", admin_appointments_path(filter: @filter.to_h, page: prev_page), class: "inline-flex items-center rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50" %>
+        <% else %>
+          <span class="inline-flex items-center rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-400">Previous</span>
+        <% end %>
+        <% if @current_page < @total_pages %>
+          <%= link_to "Next", admin_appointments_path(filter: @filter.to_h, page: next_page), class: "inline-flex items-center rounded-md border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:bg-slate-50" %>
+        <% else %>
+          <span class="inline-flex items-center rounded-md border border-slate-200 px-3 py-2 text-sm text-slate-400">Next</span>
+        <% end %>
+      </div>
+      <%= hidden_field_tag :bulk_action, "confirm" %>
+      <%= submit_tag "Confirm selected", class: "inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500" %>
+    </div>
+  <% end %>
+
+  <div class="hidden" data-cancel-modal-target="modal">
+    <div class="fixed inset-0 z-40 bg-slate-900/40" data-action="click->cancel-modal#close"></div>
+    <div class="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl" data-action="click->cancel-modal#stop">
+        <div class="flex items-start justify-between">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Cancel appointment</h2>
+            <p class="mt-1 text-sm text-slate-500">Provide a reason for cancelling <span class="font-medium" data-cancel-modal-target="patientName"></span>.</p>
+          </div>
+          <button type="button" class="text-slate-400 hover:text-slate-600" data-action="cancel-modal#close">&times;</button>
+        </div>
+        <%= form_with scope: :appointment, url: "", method: :patch, data: { cancel_modal_target: "form" } do |f| %>
+          <div class="mt-4">
+            <%= f.label :cancellation_reason, "Reason", class: "block text-sm font-medium text-slate-700" %>
+            <%= f.text_area :cancellation_reason, rows: 4, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500", required: true %>
+          </div>
+          <div class="mt-6 flex justify-end space-x-3">
+            <button type="button" class="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800" data-action="cancel-modal#close">Dismiss</button>
+            <%= f.submit "Cancel appointment", class: "inline-flex items-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

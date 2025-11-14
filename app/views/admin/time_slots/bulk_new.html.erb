@@ -1,0 +1,105 @@
+<div class="space-y-8">
+  <div class="max-w-4xl">
+    <h1 class="text-2xl font-semibold text-slate-900">Bulk create time slots</h1>
+    <p class="mt-1 text-sm text-slate-500">Generate a week's worth of availability in a single action.</p>
+  </div>
+
+  <div class="max-w-4xl rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <%= form_with scope: :bulk, url: bulk_preview_admin_time_slots_path, method: :post, local: true, class: "space-y-6" do |form| %>
+      <div class="grid gap-6 md:grid-cols-2">
+        <div>
+          <%= form.label :doctor_id, "Doctor", class: "block text-sm font-medium text-slate-700" %>
+          <%= form.collection_select :doctor_id, @doctors, :id, :name, { prompt: "Select doctor", selected: @generator.doctor_id }, { class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500", required: true } %>
+        </div>
+        <div>
+          <%= form.label :status, class: "block text-sm font-medium text-slate-700" %>
+          <%= form.select :status, TimeSlot.statuses.keys.map { |status| [status.titleize, status] }, { selected: @generator.status }, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" %>
+        </div>
+        <div>
+          <%= form.label :start_date, "Start date", class: "block text-sm font-medium text-slate-700" %>
+          <%= form.date_field :start_date, value: @generator.start_date, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500", required: true %>
+        </div>
+        <div>
+          <%= form.label :end_date, "End date", class: "block text-sm font-medium text-slate-700" %>
+          <%= form.date_field :end_date, value: @generator.end_date, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500", required: true %>
+        </div>
+        <div>
+          <%= form.label :start_time, "Daily start time", class: "block text-sm font-medium text-slate-700" %>
+          <%= form.time_field :start_time, value: @generator.start_time, step: 900, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500", required: true %>
+        </div>
+        <div>
+          <%= form.label :end_time, "Daily end time", class: "block text-sm font-medium text-slate-700" %>
+          <%= form.time_field :end_time, value: @generator.end_time, step: 900, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500", required: true %>
+        </div>
+        <div>
+          <%= form.label :duration_minutes, "Slot duration", class: "block text-sm font-medium text-slate-700" %>
+          <div class="mt-2 flex space-x-3">
+            <% [30, 60].each do |duration| %>
+              <label class="inline-flex items-center space-x-2 text-sm text-slate-600">
+                <%= form.radio_button :duration_minutes, duration, checked: (@generator.duration_minutes.to_i == duration) %>
+                <span><%= duration %> minutes</span>
+              </label>
+            <% end %>
+          </div>
+        </div>
+        <div>
+          <%= form.label :max_patients, "Max patients per slot", class: "block text-sm font-medium text-slate-700" %>
+          <%= form.number_field :max_patients, value: @generator.max_patients, min: 1, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500", required: true %>
+        </div>
+      </div>
+      <div class="flex justify-end">
+        <%= form.submit "Preview slots", class: "inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700" %>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @generated_slots.present? %>
+    <div class="max-w-4xl rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div class="border-b border-slate-200 px-6 py-4">
+        <h2 class="text-lg font-semibold text-slate-900">Preview</h2>
+        <p class="text-sm text-slate-500">Slots marked in amber already exist and will be skipped.</p>
+      </div>
+      <div class="overflow-hidden">
+        <table class="min-w-full divide-y divide-slate-200 text-sm">
+          <thead class="bg-slate-50">
+            <tr class="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+              <th class="px-6 py-3">Date</th>
+              <th class="px-6 py-3">Time</th>
+              <th class="px-6 py-3">Capacity</th>
+              <th class="px-6 py-3">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-200 bg-white">
+            <% @generated_slots.each do |slot| %>
+              <tr class="<%= slot.duplicate ? 'bg-amber-50' : 'hover:bg-slate-50' %>">
+                <td class="px-6 py-3 text-sm text-slate-700"><%= slot.date.strftime('%b %d, %Y') %></td>
+                <td class="px-6 py-3 text-sm text-slate-700"><%= slot.start_time.strftime('%H:%M') %> - <%= slot.end_time.strftime('%H:%M') %></td>
+                <td class="px-6 py-3 text-sm text-slate-700"><%= slot.max_patients %> patients</td>
+                <td class="px-6 py-3 text-sm text-slate-700"><%= slot.status.titleize %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex items-center justify-between border-t border-slate-200 px-6 py-4 text-sm text-slate-600">
+        <div>
+          <strong><%= @generated_slots.count - @generator.duplicates.count %></strong> new slots will be created.
+          <% if @generator.duplicates.any? %>
+            <span class="ml-2 text-amber-600"><%= @generator.duplicates.count %> duplicate slots detected.</span>
+          <% end %>
+        </div>
+        <%= form_with scope: :bulk, url: bulk_create_admin_time_slots_path, method: :post, local: true do |form| %>
+          <%= form.hidden_field :doctor_id, value: @generator.doctor_id %>
+          <%= form.hidden_field :status, value: @generator.status %>
+          <%= form.hidden_field :start_date, value: @generator.start_date %>
+          <%= form.hidden_field :end_date, value: @generator.end_date %>
+          <%= form.hidden_field :start_time, value: @generator.start_time %>
+          <%= form.hidden_field :end_time, value: @generator.end_time %>
+          <%= form.hidden_field :duration_minutes, value: @generator.duration_minutes %>
+          <%= form.hidden_field :max_patients, value: @generator.max_patients %>
+          <%= form.submit "Create slots", class: "inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500" %>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

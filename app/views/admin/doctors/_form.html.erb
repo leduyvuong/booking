@@ -1,0 +1,41 @@
+<%= form_with model: [:admin, @doctor], class: "space-y-6" do |form| %>
+  <% if @doctor.errors.any? %>
+    <div class="rounded-md border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+      <p class="font-semibold">There were issues saving this doctor:</p>
+      <ul class="mt-2 list-disc pl-5">
+        <% @doctor.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div class="grid gap-6 md:grid-cols-2">
+    <div>
+      <%= form.label :clinic_id, "Clinic", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.collection_select :clinic_id, @clinics, :id, :name, { prompt: "Select a clinic" }, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+    <div>
+      <%= form.label :name, class: "block text-sm font-medium text-slate-700" %>
+      <%= form.text_field :name, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+    <div>
+      <%= form.label :specialty, class: "block text-sm font-medium text-slate-700" %>
+      <%= form.text_field :specialty, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+    <div>
+      <%= form.label :avatar_url, "Avatar URL", class: "block text-sm font-medium text-slate-700" %>
+      <%= form.url_field :avatar_url, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+  </div>
+
+  <div>
+    <%= form.label :bio, class: "block text-sm font-medium text-slate-700" %>
+    <%= form.text_area :bio, rows: 4, class: "mt-1 block w-full rounded-md border-slate-300 shadow-sm focus:border-slate-500 focus:ring-slate-500" %>
+  </div>
+
+  <div class="flex justify-end space-x-3">
+    <%= link_to "Cancel", admin_doctors_path, class: "px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-800" %>
+    <%= form.submit class: "inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700" %>
+  </div>
+<% end %>
