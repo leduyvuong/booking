@@ -1,0 +1,90 @@
+<div class="flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">Appointment <span class="font-mono text-base text-slate-500"><%= @appointment.booking_number %></span></h1>
+    <p class="mt-1 text-sm text-slate-500">Booked on <%= @appointment.created_at.strftime('%B %d, %Y at %H:%M') %></p>
+  </div>
+  <div class="flex items-center space-x-3">
+    <% if @appointment.pending? %>
+      <%= button_to "Confirm", admin_appointment_path(@appointment), method: :patch, params: { appointment: { status: :confirmed } }, class: "inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-500" %>
+    <% end %>
+    <% unless @appointment.cancelled? %>
+      <%= button_to "Cancel", cancel_admin_appointment_path(@appointment), method: :patch, params: { appointment: { cancellation_reason: "Cancelled by admin" } }, form: { data: { turbo_confirm: "Cancel this appointment?" } }, class: "inline-flex items-center rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-rose-500" %>
+    <% end %>
+  </div>
+</div>
+
+<div class="mt-8 grid gap-8 lg:grid-cols-3">
+  <div class="space-y-6 lg:col-span-2">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-slate-900">Patient details</h2>
+      <dl class="mt-4 grid gap-6 sm:grid-cols-2">
+        <div>
+          <dt class="text-sm font-medium text-slate-500">Name</dt>
+          <dd class="mt-1 text-base text-slate-800"><%= @appointment.patient_name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-slate-500">Email</dt>
+          <dd class="mt-1 text-base text-slate-800"><%= @appointment.patient_email %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-slate-500">Phone</dt>
+          <dd class="mt-1 text-base text-slate-800"><%= @appointment.patient_phone %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-slate-500">Status</dt>
+          <dd class="mt-1">
+            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-sm font-medium <%= status_badge_classes(@appointment.status) %>"><%= @appointment.status.titleize %></span>
+          </dd>
+        </div>
+      </dl>
+      <% if @appointment.notes.present? %>
+        <div class="mt-6">
+          <dt class="text-sm font-medium text-slate-500">Notes</dt>
+          <dd class="mt-2 text-sm text-slate-600"><%= simple_format(@appointment.notes) %></dd>
+        </div>
+      <% end %>
+      <% if @appointment.cancelled? && @appointment.cancellation_reason.present? %>
+        <div class="mt-6 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+          <p class="font-medium">Cancellation reason</p>
+          <p class="mt-1"><%= @appointment.cancellation_reason %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @time_slot %>
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 class="text-lg font-semibold text-slate-900">Scheduled time</h2>
+        <dl class="mt-4 grid gap-6 sm:grid-cols-2">
+          <div>
+            <dt class="text-sm font-medium text-slate-500">Date</dt>
+            <dd class="mt-1 text-base text-slate-800"><%= @time_slot.date.strftime('%A, %B %d, %Y') %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-slate-500">Time</dt>
+            <dd class="mt-1 text-base text-slate-800"><%= @time_slot.start_time.strftime('%H:%M') %> - <%= @time_slot.end_time.strftime('%H:%M') %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-slate-500">Doctor</dt>
+            <dd class="mt-1 text-base text-slate-800"><%= @time_slot.doctor.name %></dd>
+          </div>
+          <div>
+            <dt class="text-sm font-medium text-slate-500">Clinic</dt>
+            <dd class="mt-1 text-base text-slate-800"><%= @time_slot.doctor.clinic.name %></dd>
+          </div>
+        </dl>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="space-y-6">
+    <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 class="text-lg font-semibold text-slate-900">Quick actions</h2>
+      <div class="mt-4 space-y-3 text-sm">
+        <% if @time_slot %>
+          <%= link_to "Open time slot", admin_time_slot_path(@time_slot), class: "block text-slate-600 hover:text-slate-900" %>
+        <% end %>
+        <%= link_to "Back to appointments", admin_appointments_path, class: "block text-slate-600 hover:text-slate-900" %>
+      </div>
+    </div>
+  </div>
+</div>

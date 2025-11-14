@@ -14,6 +14,7 @@ gem "jbuilder"
 gem "redis", "~> 5.0"
 gem "bootsnap", "~> 1.16", require: false
 gem "devise"
+gem "csv"
 
 group :development, :test do
   gem "debug", platforms: %i[mri]

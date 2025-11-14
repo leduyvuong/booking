@@ -1,0 +1,81 @@
+<div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">Time slots</h1>
+    <p class="mt-1 text-sm text-slate-500">Control availability across all doctors.</p>
+  </div>
+  <div class="flex items-center space-x-3">
+    <%= link_to "Bulk create", bulk_new_admin_time_slots_path, class: "inline-flex items-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" %>
+    <%= link_to "New time slot", new_admin_time_slot_path, class: "inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700" %>
+  </div>
+</div>
+
+<div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+  <%= form_with url: admin_time_slots_path, method: :get, local: true, class: "grid gap-4 md:grid-cols-5 md:items-end" do |form| %>
+    <div>
+      <%= form.label :doctor_id, "Doctor", class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= form.collection_select :doctor_id, @doctors, :id, :name, { include_blank: "All" }, class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+    <div>
+      <%= form.label :status, class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= form.select :status, TimeSlot.statuses.keys.map { |status| [status.titleize, status] }, { include_blank: "All" }, class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+    <div>
+      <%= form.label :start_date, class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= form.date_field :start_date, value: @filter[:start_date], class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+    <div>
+      <%= form.label :end_date, class: "block text-xs font-semibold uppercase tracking-wide text-slate-500" %>
+      <%= form.date_field :end_date, value: @filter[:end_date], class: "mt-1 block w-full rounded-md border-slate-300 text-sm focus:border-slate-500 focus:ring-slate-500" %>
+    </div>
+    <div class="flex space-x-2">
+      <%= form.submit "Filter", class: "inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700" %>
+      <%= link_to "Reset", admin_time_slots_path, class: "inline-flex items-center rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" %>
+    </div>
+  <% end %>
+</div>
+
+<div class="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <table class="min-w-full divide-y divide-slate-200 text-sm">
+    <thead class="bg-slate-50">
+      <tr class="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <th class="px-6 py-3">Date</th>
+        <th class="px-6 py-3">Time</th>
+        <th class="px-6 py-3">Doctor</th>
+        <th class="px-6 py-3">Capacity</th>
+        <th class="px-6 py-3">Status</th>
+        <th class="px-6 py-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 bg-white">
+      <% @time_slots.each do |slot| %>
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4 text-sm text-slate-700"><%= slot.date.strftime('%b %d, %Y') %></td>
+          <td class="px-6 py-4 text-sm text-slate-700"><%= slot.start_time.strftime('%H:%M') %> - <%= slot.end_time.strftime('%H:%M') %></td>
+          <td class="px-6 py-4 text-sm text-slate-700"><%= slot.doctor.name %></td>
+          <td class="px-6 py-4 text-sm text-slate-700"><%= slot.booked_count %>/<%= slot.max_patients %> booked</td>
+          <% status_key = if slot.blocked?
+                             "blocked"
+                           elsif slot.booked_count >= slot.max_patients
+                             "full"
+                           elsif slot.booked_count.positive?
+                             "partial"
+                           else
+                             "available"
+                           end %>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium <%= status_badge_classes(status_key) %>">
+              <%= status_key.titleize %>
+            </span>
+          </td>
+          <td class="px-6 py-4 text-right text-sm font-medium">
+            <div class="inline-flex items-center space-x-2">
+              <%= link_to "View", admin_time_slot_path(slot), class: "text-slate-600 hover:text-slate-900" %>
+              <%= link_to "Edit", edit_admin_time_slot_path(slot), class: "text-slate-600 hover:text-slate-900" %>
+              <%= button_to "Delete", admin_time_slot_path(slot), method: :delete, data: { turbo_confirm: "Delete this time slot?" }, class: "text-rose-600 hover:text-rose-700" %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

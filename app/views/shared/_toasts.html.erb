@@ -1,0 +1,19 @@
+<% if flash.present? %>
+  <div data-controller="toast" class="fixed top-4 right-4 z-50 space-y-3">
+    <% flash.each do |type, message| %>
+      <% next if message.blank? %>
+      <% color = case type.to_sym
+        when :notice then "bg-emerald-500"
+        when :alert then "bg-rose-500"
+        else "bg-slate-700"
+      end %>
+      <div data-toast-target="toast" class="flex items-start space-x-3 text-white px-4 py-3 rounded-lg shadow-lg <%= color %>">
+        <div class="flex-1 text-sm font-medium"><%= message %></div>
+        <button type="button" data-action="toast#dismiss" class="text-white/80 hover:text-white">
+          <span class="sr-only">Dismiss</span>
+          &times;
+        </button>
+      </div>
+    <% end %>
+  </div>
+<% end %>

@@ -1,0 +1,50 @@
+<div class="flex items-center justify-between">
+  <div>
+    <h1 class="text-2xl font-semibold text-slate-900">Doctors</h1>
+    <p class="mt-1 text-sm text-slate-500">Manage your providers and their profiles.</p>
+  </div>
+  <%= link_to "Add doctor", new_admin_doctor_path, class: "inline-flex items-center rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700" %>
+</div>
+
+<div class="mt-8 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+  <table class="min-w-full divide-y divide-slate-200 text-sm">
+    <thead class="bg-slate-50">
+      <tr class="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+        <th scope="col" class="px-6 py-3">Doctor</th>
+        <th scope="col" class="px-6 py-3">Specialty</th>
+        <th scope="col" class="px-6 py-3">Clinic</th>
+        <th scope="col" class="px-6 py-3 text-right">Actions</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-slate-200 bg-white">
+      <% @doctors.each do |doctor| %>
+        <tr class="hover:bg-slate-50">
+          <td class="px-6 py-4">
+            <div class="flex items-center space-x-3">
+              <% if doctor.avatar_url.present? %>
+                <img src="<%= doctor.avatar_url %>" alt="<%= doctor.name %>" class="h-10 w-10 rounded-full object-cover" />
+              <% else %>
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                  <span class="text-sm font-semibold"><%= doctor.name.first %></span>
+                </div>
+              <% end %>
+              <div>
+                <p class="text-sm font-semibold text-slate-900"><%= doctor.name %></p>
+                <p class="text-xs text-slate-500">Added <%= doctor.created_at.strftime('%b %d, %Y') %></p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-700"><%= doctor.specialty %></td>
+          <td class="px-6 py-4 text-sm text-slate-700"><%= doctor.clinic.name %></td>
+          <td class="px-6 py-4 text-right text-sm font-medium">
+            <div class="inline-flex items-center space-x-2">
+              <%= link_to "View", admin_doctor_path(doctor), class: "text-slate-600 hover:text-slate-900" %>
+              <%= link_to "Edit", edit_admin_doctor_path(doctor), class: "text-slate-600 hover:text-slate-900" %>
+              <%= button_to "Delete", admin_doctor_path(doctor), method: :delete, data: { turbo_confirm: "Delete this doctor?" }, class: "text-rose-600 hover:text-rose-700" %>
+            </div>
+          </td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>

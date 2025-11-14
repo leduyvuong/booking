@@ -1,0 +1,116 @@
+<div class="space-y-10">
+  <section>
+    <h1 class="text-2xl font-semibold text-slate-900">Dashboard</h1>
+    <p class="mt-1 text-sm text-slate-500">Monitor the health of your clinic and take action quickly.</p>
+
+    <dl class="mt-8 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+      <div class="flex items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 px-5 py-6">
+        <div class="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 7.5l4.5 4.5L3 16.5M21 7.5l-4.5 4.5L21 16.5M10.5 4.5h3v15h-3z" />
+          </svg>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-slate-500">Appointments today</dt>
+          <dd class="mt-1 text-2xl font-semibold text-slate-900"><%= @today_appointments_count %></dd>
+        </div>
+      </div>
+
+      <div class="flex items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 px-5 py-6">
+        <div class="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-sky-100 text-sky-600">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 6.75V5.25A2.25 2.25 0 015.25 3h13.5A2.25 2.25 0 0121 5.25v1.5M3 6.75h18M3 6.75v10.5A2.25 2.25 0 005.25 19.5h13.5A2.25 2.25 0 0021 17.25V6.75M8.25 12h7.5" />
+          </svg>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-slate-500">Appointments this week</dt>
+          <dd class="mt-1 text-2xl font-semibold text-slate-900"><%= @week_appointments_count %></dd>
+        </div>
+      </div>
+
+      <div class="flex items-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 px-5 py-6">
+        <div class="mr-4 flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+          </svg>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-slate-500">Pending confirmations</dt>
+          <dd class="mt-1 text-2xl font-semibold text-slate-900"><%= @pending_appointments_count %></dd>
+        </div>
+      </div>
+    </dl>
+  </section>
+
+  <section class="grid gap-8 lg:grid-cols-2">
+    <div class="rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
+      <div class="border-b border-slate-100 px-6 py-4">
+        <h2 class="text-lg font-semibold text-slate-900">Recent appointments</h2>
+        <p class="text-sm text-slate-500">Latest bookings awaiting review.</p>
+      </div>
+      <div class="p-6">
+        <% if @recent_appointments.any? %>
+          <div class="overflow-hidden rounded-lg border border-slate-200">
+            <table class="min-w-full divide-y divide-slate-200 text-sm">
+              <thead class="bg-slate-50">
+                <tr class="text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  <th scope="col" class="px-4 py-3">Booking #</th>
+                  <th scope="col" class="px-4 py-3">Patient</th>
+                  <th scope="col" class="px-4 py-3">Doctor</th>
+                  <th scope="col" class="px-4 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-200 bg-white">
+                <% @recent_appointments.each do |appointment| %>
+                  <tr class="hover:bg-slate-50">
+                    <td class="px-4 py-3 font-mono text-xs text-slate-500"><%= appointment.booking_number %></td>
+                    <td class="px-4 py-3 text-slate-700">
+                      <div class="font-medium"><%= appointment.patient_name %></div>
+                      <div class="text-xs text-slate-500"><%= appointment.patient_email %></div>
+                    </td>
+                    <td class="px-4 py-3 text-slate-700"><%= appointment.time_slot&.doctor&.name %></td>
+                    <td class="px-4 py-3">
+                      <span class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium <%= status_badge_classes(appointment.status) %>">
+                        <%= appointment.status.titleize %>
+                      </span>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <p class="text-sm text-slate-500">No appointments booked yet.</p>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="rounded-xl bg-white shadow-sm ring-1 ring-slate-100">
+      <div class="border-b border-slate-100 px-6 py-4">
+        <h2 class="text-lg font-semibold text-slate-900">Upcoming time slots</h2>
+        <p class="text-sm text-slate-500">Next 7 days at a glance.</p>
+      </div>
+      <div class="p-6">
+        <% if @upcoming_time_slots.any? %>
+          <ul class="space-y-4">
+            <% @upcoming_time_slots.each do |slot| %>
+              <li class="flex items-start justify-between rounded-lg border border-slate-200 px-4 py-3 shadow-sm">
+                <div>
+                  <p class="text-sm font-semibold text-slate-800"><%= slot.doctor.name %></p>
+                  <p class="text-xs text-slate-500">
+                    <%= slot.date.strftime('%a, %b %d') %> · <%= slot.start_time.strftime('%H:%M') %> - <%= slot.end_time.strftime('%H:%M') %>
+                  </p>
+                </div>
+                <div class="text-right text-xs font-medium text-slate-500">
+                  <span class="inline-flex items-center rounded-full bg-slate-100 px-2 py-1 text-slate-700"><%= slot.booked_count %>/<%= slot.max_patients %> booked</span>
+                </div>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="text-sm text-slate-500">No time slots scheduled for the upcoming week.</p>
+        <% end %>
+      </div>
+    </div>
+  </section>
+</div>
