@@ -1,0 +1,10 @@
+<h1 class="text-2xl font-semibold text-slate-800 mb-6">Doctors</h1>
+<div class="grid gap-6 md:grid-cols-2">
+  <% @doctors.each do |doctor| %>
+    <div class="bg-white shadow rounded-xl p-6">
+      <h2 class="text-xl font-semibold text-slate-800"><%= link_to doctor.name, doctor, class: "hover:text-blue-600" %></h2>
+      <p class="text-slate-600"><%= doctor.specialty %></p>
+      <p class="mt-2 text-sm text-slate-500">Clinic: <%= doctor.clinic.name %></p>
+    </div>
+  <% end %>
+</div>

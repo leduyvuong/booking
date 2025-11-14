@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+require_relative "../config/boot"
+require "importmap/commands"
+Importmap::Commands.start

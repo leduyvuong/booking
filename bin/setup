@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+require "fileutils"
+include FileUtils
+
+APP_ROOT = File.expand_path("../", __dir__)
+
+def system!(*args)
+  system(*args) || abort("Command failed: #{args.join(' ')}")
+end
+
+chdir APP_ROOT do
+  puts "== Installing dependencies =="
+  system! "bundle install"
+
+  puts "== Preparing database =="
+  system! "bundle exec rails db:prepare"
+end

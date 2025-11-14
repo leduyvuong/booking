@@ -1,0 +1,40 @@
+<div class="space-y-8">
+  <section class="bg-white shadow rounded-xl p-6">
+    <h1 class="text-2xl font-semibold text-slate-800">Welcome to Clinic Booking</h1>
+    <p class="mt-2 text-slate-600">Browse available clinics and book appointments with top doctors.</p>
+  </section>
+
+  <% @clinics.each do |clinic| %>
+    <section class="bg-white shadow rounded-xl p-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+          <h2 class="text-xl font-semibold text-slate-800"><%= clinic.name %></h2>
+          <p class="text-slate-600"><%= clinic.address %></p>
+          <p class="text-slate-600">Phone: <%= clinic.phone %></p>
+        </div>
+        <div class="mt-4 md:mt-0 text-sm text-slate-500">
+          <div>Email: <%= clinic.email %></div>
+          <div>Opening Hours: <%= clinic.opening_hours.map { |day, hours| "#{day.titleize}: #{hours}" }.join(', ') %></div>
+        </div>
+      </div>
+
+      <div class="mt-6 grid gap-6 md:grid-cols-3">
+        <% clinic.doctors.each do |doctor| %>
+          <div class="border border-slate-200 rounded-lg p-4">
+            <div class="flex items-center space-x-4">
+              <div class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-semibold">
+                <%= doctor.name.split.map(&:first).join %>
+              </div>
+              <div>
+                <h3 class="text-lg font-medium text-slate-800"><%= doctor.name %></h3>
+                <p class="text-sm text-slate-500"><%= doctor.specialty %></p>
+              </div>
+            </div>
+            <p class="mt-4 text-sm text-slate-600"><%= doctor.bio %></p>
+            <%= link_to "View Availability", doctor_time_slots_path(doctor), class: "mt-4 inline-flex items-center justify-center px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition text-sm" %>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  <% end %>
+</div>

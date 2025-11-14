@@ -1,0 +1,7 @@
+{
+  "name": "clinic-booking",
+  "private": true,
+  "dependencies": {
+    "@tailwindcss/forms": "^0.5.7"
+  }
+}
