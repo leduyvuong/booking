@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "csv"
-
 module Admin
   class AppointmentsController < BaseController
     before_action :set_appointment, only: %i[show update cancel]

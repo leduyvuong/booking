@@ -19,7 +19,7 @@
     </div>
   </div>
 
-  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" data-controller="calendar" data-calendar-events-value="<%= raw(json_escape(@events.to_json)) %>">
+  <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm" data-controller="calendar" data-calendar-events-value='<%= @events.to_json %>'>
     <div data-calendar-target="calendar"></div>
 
     <div class="hidden" data-calendar-target="modal">

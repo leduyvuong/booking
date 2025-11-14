@@ -21,6 +21,15 @@ export default class extends Controller {
       return
     }
 
+    let events = []
+    try {
+      events = this.eventsValue || []
+      console.log("Events loaded:", events.length)
+    } catch (e) {
+      console.error("Error parsing events:", e)
+      events = []
+    }
+
     this.calendar = new window.FullCalendar.Calendar(this.calendarTarget, {
       initialView: "dayGridMonth",
       headerToolbar: {
@@ -28,7 +37,7 @@ export default class extends Controller {
         center: "title",
         right: "dayGridMonth,timeGridWeek,timeGridDay"
       },
-      events: this.eventsValue || [],
+      events: events,
       eventClick: this.handleEventClick.bind(this),
       height: "auto"
     })
