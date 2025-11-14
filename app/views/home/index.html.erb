@@ -1,113 +1,195 @@
-<div class="space-y-12">
-  <section class="overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-500 text-white shadow-xl">
-    <div class="relative isolate px-6 py-16 sm:px-12 lg:flex lg:items-center lg:justify-between lg:gap-16">
-      <div class="max-w-xl space-y-6">
-        <span class="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-sm font-medium tracking-wide">Modern care made simple</span>
-        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl">
-          Book your next appointment in minutes.
-        </h1>
-        <p class="text-lg text-blue-100">
-          Explore our specialist team, compare availability, and reserve a time that works for you—all from the comfort of your home.
-        </p>
-        <div class="flex flex-wrap items-center gap-4">
-          <%= link_to "Find a doctor", doctors_path, class: "inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition" %>
-          <%= link_to "View my appointments", my_appointments_path, class: "inline-flex items-center justify-center rounded-full bg-white/10 px-6 py-3 text-sm font-semibold text-white shadow hover:bg-white/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition" if user_signed_in? %>
-        </div>
-      </div>
-      <div class="mt-10 lg:mt-0 lg:flex-shrink-0">
-        <div class="rounded-2xl bg-white/10 p-6 shadow-lg backdrop-blur">
-          <dl class="grid grid-cols-2 gap-6 text-sm">
-            <div>
-              <dt class="text-blue-100">Clinics</dt>
-              <dd class="mt-1 text-2xl font-semibold"><%= @clinics.count %></dd>
-            </div>
-            <div>
-              <dt class="text-blue-100">Doctors</dt>
-              <dd class="mt-1 text-2xl font-semibold"><%= Doctor.count %></dd>
-            </div>
-            <div>
-              <dt class="text-blue-100">Average wait</dt>
-              <dd class="mt-1 text-2xl font-semibold">&lt; 3 days</dd>
-            </div>
-            <div>
-              <dt class="text-blue-100">Patient rating</dt>
-              <dd class="mt-1 text-2xl font-semibold">4.9 / 5</dd>
-            </div>
-          </dl>
-        </div>
-      </div>
-    </div>
-  </section>
+<% content_for :page_title, "Book Your Appointment Today | Clinic Booking" %>
+<% content_for :meta_description, "Quality healthcare with easy scheduling. Browse expert doctors, compare availability, and book your clinic visit in minutes." %>
 
-  <section class="grid gap-8 lg:grid-cols-3">
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-        <span class="text-xl font-semibold">1</span>
-      </div>
-      <h2 class="mt-4 text-lg font-semibold text-slate-900">Choose your specialist</h2>
-      <p class="mt-2 text-sm text-slate-600">Filter by specialty and review detailed profiles to find the right match for your visit.</p>
+<div class="space-y-20">
+  <section class="relative isolate overflow-hidden rounded-3xl bg-slate-900 text-white shadow-2xl">
+    <div class="absolute inset-0">
+      <img src="https://images.unsplash.com/photo-1580281657521-6fe5d43b01c4?auto=format&fit=crop&w=2000&q=80" alt="Sunlit modern medical clinic lobby with seating" class="h-full w-full object-cover" loading="lazy">
+      <div class="absolute inset-0 bg-slate-900/70"></div>
     </div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-        <span class="text-xl font-semibold">2</span>
+    <div class="relative z-10 px-6 py-16 sm:px-12 lg:px-24">
+      <div class="max-w-3xl space-y-6">
+        <p class="inline-flex items-center rounded-full bg-white/10 px-4 py-1 text-xs font-semibold uppercase tracking-widest">Trusted neighborhood care</p>
+        <h1 class="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl">Book Your Appointment Today</h1>
+        <p class="text-lg text-slate-100 sm:text-xl">Quality Healthcare, Easy Scheduling. Compare specialists, explore real-time availability, and confirm your visit without phone calls.</p>
+        <div class="flex flex-wrap items-center gap-4">
+          <%= link_to "Book Now", doctors_path, class: "inline-flex items-center justify-center rounded-full bg-white px-6 py-3 text-base font-semibold text-blue-700 shadow-lg hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition" %>
+          <p class="text-sm text-slate-100">Need help? Call <a href="tel:+15551234567" class="font-semibold text-white underline decoration-white/40 decoration-2 underline-offset-4">(555) 123-4567</a></p>
+        </div>
+        <%= form_with url: doctors_path, method: :get, local: true, html: { role: "search", class: "mt-8 flex flex-col gap-4 rounded-2xl bg-white/10 p-4 text-left shadow-2xl backdrop-blur md:flex-row md:items-center" } do %>
+          <div class="w-full">
+            <label for="specialty" class="sr-only">Find a doctor by specialty</label>
+            <%= text_field_tag :specialty, params[:specialty], placeholder: "Find a doctor by specialty", id: "specialty", class: "w-full rounded-xl border-0 bg-white/90 px-4 py-3 text-base text-slate-900 placeholder:text-slate-500 focus:ring-2 focus:ring-blue-200" %>
+          </div>
+          <%= button_tag "Search", class: "inline-flex items-center justify-center rounded-xl bg-blue-500 px-6 py-3 text-base font-semibold text-white shadow hover:bg-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white transition" %>
+        <% end %>
+        <dl class="grid gap-6 sm:grid-cols-3 text-left">
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-blue-100">Clinics served</dt>
+            <dd class="mt-1 text-3xl font-semibold"><%= Clinic.count %></dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-blue-100">Doctors available</dt>
+            <dd class="mt-1 text-3xl font-semibold"><%= Doctor.count %></dd>
+          </div>
+          <div>
+            <dt class="text-xs font-medium uppercase tracking-wide text-blue-100">Average satisfaction</dt>
+            <dd class="mt-1 text-3xl font-semibold">4.9 / 5</dd>
+          </div>
+        </dl>
       </div>
-      <h2 class="mt-4 text-lg font-semibold text-slate-900">Pick a convenient time</h2>
-      <p class="mt-2 text-sm text-slate-600">See real-time availability and reserve a slot instantly with Turbo-powered updates.</p>
-    </div>
-    <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600">
-        <span class="text-xl font-semibold">3</span>
-      </div>
-      <h2 class="mt-4 text-lg font-semibold text-slate-900">Get appointment reminders</h2>
-      <p class="mt-2 text-sm text-slate-600">Receive confirmations and stay on top of your care plan with your patient dashboard.</p>
     </div>
   </section>
 
   <section class="space-y-8">
-    <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div>
-        <h2 class="text-2xl font-semibold text-slate-900">Our clinics</h2>
-        <p class="text-sm text-slate-500">Trusted community locations with compassionate teams ready to help.</p>
-      </div>
-      <%= link_to "Browse doctors", doctors_path, class: "inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition" %>
+    <div class="text-center">
+      <p class="text-sm font-semibold uppercase tracking-widest text-blue-600">Why patients choose us</p>
+      <h2 class="mt-2 text-3xl font-semibold text-slate-900">Smart tools for better clinic visits</h2>
+      <p class="mt-3 text-base text-slate-600">We pair compassionate care with intuitive technology so you can focus on feeling your best.</p>
     </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      <article class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+          <span class="text-2xl" aria-hidden="true">⚡</span>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900">Easy Booking</h3>
+        <p class="text-sm text-slate-600">Schedule in 3 simple steps with instant confirmation and automatic reminders.</p>
+      </article>
+      <article class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+          <span class="text-2xl" aria-hidden="true">🩺</span>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900">Expert Doctors</h3>
+        <p class="text-sm text-slate-600">Board-certified specialists, complete bios, and verified patient feedback.</p>
+      </article>
+      <article class="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <div class="inline-flex h-14 w-14 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+          <span class="text-2xl" aria-hidden="true">⏰</span>
+        </div>
+        <h3 class="text-xl font-semibold text-slate-900">Flexible Times</h3>
+        <p class="text-sm text-slate-600">Morning, afternoon, and evening slots that fit any schedule.</p>
+      </article>
+    </div>
+  </section>
 
-    <div class="grid gap-6 lg:grid-cols-2">
-      <% @clinics.each do |clinic| %>
-        <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h3 class="text-xl font-semibold text-slate-900"><%= clinic.name %></h3>
-              <p class="mt-1 text-sm text-slate-600"><%= clinic.address %></p>
-              <p class="mt-1 text-sm text-slate-600">Phone: <%= clinic.phone %></p>
-              <p class="mt-1 text-sm text-slate-600">Email: <%= clinic.email %></p>
+  <section class="space-y-8">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-sm font-semibold uppercase tracking-widest text-blue-600">Meet our team</p>
+        <h2 class="text-3xl font-semibold text-slate-900">Top-rated physicians</h2>
+        <p class="mt-3 text-base text-slate-600">Browse trusted specialists and connect with a clinic that understands your needs.</p>
+      </div>
+      <%= link_to "View All Doctors", doctors_path, class: "inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-900 hover:border-blue-500 hover:text-blue-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500" %>
+    </div>
+    <% if @top_doctors.any? %>
+      <div class="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+        <% @top_doctors.each do |doctor| %>
+          <% avatar = doctor.avatar_url.presence || "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=640&q=80" %>
+          <article class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center gap-4">
+              <%= image_tag avatar, alt: "Portrait of #{doctor.name}", class: "h-16 w-16 rounded-full object-cover", loading: "lazy" %>
+              <div>
+                <h3 class="text-lg font-semibold text-slate-900"><%= doctor.name %></h3>
+                <p class="text-sm text-slate-500"><%= doctor.specialty %></p>
+                <p class="text-xs text-slate-400"><%= doctor.clinic.name %></p>
+              </div>
             </div>
-            <div class="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
-              <h4 class="text-xs font-semibold uppercase tracking-wide text-slate-400">Opening hours</h4>
-              <ul class="mt-2 space-y-1">
-                <% clinic.opening_hours.each do |day, hours| %>
-                  <li><span class="font-medium text-slate-600"><%= day.titleize %>:</span> <%= hours %></li>
-                <% end %>
-              </ul>
+            <p class="mt-4 flex-1 text-sm text-slate-600"><%= truncate(doctor.bio.to_s.presence || "Dedicated to personalized care for every visit.", length: 120) %></p>
+            <%= link_to "View Profile", doctor_path(doctor), class: "mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600" %>
+          </article>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="rounded-2xl border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">Doctors will appear here as soon as your clinic team adds them.</div>
+    <% end %>
+  </section>
+
+  <section class="rounded-3xl bg-white p-10 shadow-xl">
+    <div class="grid gap-8 md:grid-cols-3">
+      <div class="space-y-3">
+        <p class="text-sm font-semibold uppercase tracking-widest text-blue-600">How it works</p>
+        <h2 class="text-3xl font-semibold text-slate-900">Care in three guided steps</h2>
+        <p class="text-base text-slate-600">Streamlined booking keeps you informed from discovery to confirmation.</p>
+      </div>
+      <div class="md:col-span-2 grid gap-6 md:grid-cols-3">
+        <% steps = [
+          { number: 1, title: "Choose Doctor", description: "Explore specialties, read bios, and select the perfect provider." },
+          { number: 2, title: "Pick Time", description: "Select a morning, afternoon, or evening slot that matches your schedule." },
+          { number: 3, title: "Get Confirmation", description: "Receive instant confirmations plus reminders via email or SMS." }
+        ] %>
+        <% steps.each do |step| %>
+          <article class="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-6">
+            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-600 text-xl font-semibold text-white"><%= step[:number] %></div>
+            <h3 class="text-lg font-semibold text-slate-900"><%= step[:title] %></h3>
+            <p class="text-sm text-slate-600"><%= step[:description] %></p>
+          </article>
+        <% end %>
+      </div>
+    </div>
+  </section>
+
+  <section class="space-y-8">
+    <div class="text-center">
+      <p class="text-sm font-semibold uppercase tracking-widest text-blue-600">Patient stories</p>
+      <h2 class="text-3xl font-semibold text-slate-900">Testimonials from real visits</h2>
+    </div>
+    <% testimonials = [
+      { name: "Sophia Patel", text: "Booking took less than five minutes and I received reminders leading up to my visit.", avatar: "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?auto=format&fit=crop&w=400&q=80" },
+      { name: "Marcus Reed", text: "I could compare specialists side-by-side and found an evening slot that fit my schedule.", avatar: "https://images.unsplash.com/photo-1504593811423-6dd665756598?auto=format&fit=crop&w=400&q=80" },
+      { name: "Amina Farouk", text: "The confirmation emails and text reminders removed all of the guesswork.", avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=400&q=80" }
+    ] %>
+    <div class="grid gap-6 md:grid-cols-3">
+      <% testimonials.each do |testimonial| %>
+        <article class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="flex items-center gap-4">
+            <%= image_tag testimonial[:avatar], alt: "Patient #{testimonial[:name]}", class: "h-14 w-14 rounded-full object-cover", loading: "lazy" %>
+            <div>
+              <p class="font-semibold text-slate-900"><%= testimonial[:name] %></p>
+              <p class="text-sm text-amber-500" aria-label="5 star review">★★★★★</p>
             </div>
           </div>
-          <% if clinic.doctors.any? %>
-            <div class="mt-6 grid gap-4 sm:grid-cols-2">
-              <% clinic.doctors.first(4).each do |doctor| %>
-                <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-                  <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-base font-semibold text-blue-600">
-                    <%= doctor.name.split.map(&:first).join %>
-                  </div>
-                  <div>
-                    <p class="text-sm font-semibold text-slate-800"><%= doctor.name %></p>
-                    <p class="text-xs text-slate-500"><%= doctor.specialty %></p>
-                  </div>
-                </div>
-              <% end %>
-            </div>
-          <% end %>
-        </div>
+          <p class="mt-4 text-sm text-slate-600"><%= testimonial[:text] %></p>
+        </article>
       <% end %>
     </div>
   </section>
+
+  <footer class="rounded-3xl bg-slate-900 p-10 text-slate-200">
+    <div class="grid gap-10 md:grid-cols-3">
+      <div>
+        <h3 class="text-xl font-semibold text-white">CityCare Clinic Network</h3>
+        <p class="mt-4 text-sm">123 Wellness Avenue<br>Suite 400<br>Seattle, WA 98101</p>
+        <p class="mt-4 text-sm">Phone: <a href="tel:+15559876543" class="font-semibold text-white">(555) 987-6543</a><br>Email: <a href="mailto:hello@citycare.com" class="font-semibold text-white">hello@citycare.com</a></p>
+        <p class="mt-4 text-sm">Hours: Mon–Fri 7am–8pm · Sat 8am–2pm</p>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold uppercase tracking-widest text-blue-200">Quick Links</h4>
+        <ul class="mt-4 space-y-2 text-sm">
+          <li><%= link_to "About", clinics_path, class: "hover:text-white" %></li>
+          <li><%= link_to "Doctors", doctors_path, class: "hover:text-white" %></li>
+          <li><%= link_to "Book", doctors_path(anchor: "booking"), class: "hover:text-white" %></li>
+          <li><%= link_to "Contact", new_user_session_path, class: "hover:text-white" %></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold uppercase tracking-widest text-blue-200">Stay connected</h4>
+        <p class="mt-4 text-sm">Follow clinic updates, wellness tips, and new specialists.</p>
+        <div class="mt-4 flex gap-4">
+          <% social_icons = [
+            { name: "Facebook", path: "M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" },
+            { name: "Instagram", path: "M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm10 2a3 3 0 013 3v10a3 3 0 01-3 3H7a3 3 0 01-3-3V7a3 3 0 013-3h10zm-5 3a5 5 0 100 10 5 5 0 000-10zm0 2a3 3 0 110 6 3 3 0 010-6zm6.5-.75a1 1 0 100 2 1 1 0 000-2z" },
+            { name: "LinkedIn", path: "M6 9H2v13h4V9zm1-6a2 2 0 11-4 0 2 2 0 014 0zm5 6h-4v13h4v-7.5c0-2.071 2.5-2.241 2.5 0V22h4v-8.5c0-4.971-5-4.779-6.5-2.341V9z" }
+          ] %>
+          <% social_icons.each do |icon| %>
+            <a href="#" class="inline-flex h-12 w-12 items-center justify-center rounded-full border border-white/30 text-white hover:bg-white/10" aria-label="Visit our <%= icon[:name] %> page">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-5 w-5 fill-current" aria-hidden="true">
+                <path d="<%= icon[:path] %>"></path>
+              </svg>
+            </a>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <p class="mt-10 text-center text-xs text-slate-400">&copy; <%= Time.current.year %> CityCare Clinic Network. All rights reserved.</p>
+  </footer>
 </div>
