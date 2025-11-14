@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class TimeSlot < ApplicationRecord
+  include ActionView::RecordIdentifier
+
   belongs_to :doctor
   has_many :appointments, dependent: :destroy
 
@@ -14,6 +16,11 @@ class TimeSlot < ApplicationRecord
   validate :booked_within_capacity
 
   scope :ordered, -> { order(:date, :start_time) }
+  scope :on_date, ->(date) { date.present? ? where(date: date) : all }
+
+  def self.stream_name_for(doctor_id:, date:)
+    "time_slots:doctor:#{doctor_id}:date:#{date}"
+  end
 
   def available_slots
     [max_patients - booked_count.to_i, 0].max
@@ -21,6 +28,24 @@ class TimeSlot < ApplicationRecord
 
   def bookable?
     available? && available_slots.positive?
+  end
+
+  def start_at
+    Time.zone.local(date.year, date.month, date.day, start_time.hour, start_time.min)
+  end
+
+  def end_at
+    Time.zone.local(date.year, date.month, date.day, end_time.hour, end_time.min)
+  end
+
+  def broadcast_availability(just_booked: false)
+    stream_name = self.class.stream_name_for(doctor_id: doctor_id, date: date)
+    broadcast_replace_to(
+      stream_name,
+      target: dom_id(self),
+      partial: "time_slots/slot",
+      locals: { time_slot: self, just_booked: just_booked }
+    )
   end
 
   private

@@ -1,13 +1,85 @@
-<div class="space-y-6">
-  <section class="bg-white shadow rounded-xl p-6">
-    <h1 class="text-2xl font-semibold text-slate-800"><%= @doctor.name %></h1>
-    <p class="text-slate-600"><%= @doctor.specialty %></p>
-    <p class="mt-2 text-sm text-slate-500">Clinic: <%= link_to @doctor.clinic.name, @doctor.clinic, class: "hover:text-blue-600" %></p>
-    <p class="mt-4 text-sm text-slate-600"><%= @doctor.bio %></p>
+<div class="space-y-8" data-controller="patient-calendar"
+     data-patient-calendar-initial-date-value="<%= @selected_date %>"
+     data-patient-calendar-time-slots-url-value="<%= doctor_time_slots_path(@doctor) %>">
+  <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div class="flex flex-col gap-6 md:flex-row md:items-start md:justify-between">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center">
+        <div class="relative h-24 w-24 overflow-hidden rounded-2xl bg-blue-100">
+          <% if @doctor.avatar_url.present? %>
+            <img src="<%= @doctor.avatar_url %>" alt="<%= @doctor.name %>" class="h-full w-full object-cover" />
+          <% else %>
+            <span class="flex h-full w-full items-center justify-center text-2xl font-semibold text-blue-600">
+              <%= @doctor.name.split.map(&:first).join %>
+            </span>
+          <% end %>
+        </div>
+        <div>
+          <h1 class="text-3xl font-semibold text-slate-900"><%= @doctor.name %></h1>
+          <p class="mt-1 text-lg font-medium text-blue-600"><%= @doctor.specialty %></p>
+          <p class="mt-2 text-sm text-slate-500">Located at
+            <%= link_to @doctor.clinic.name, @doctor.clinic, class: "font-semibold text-slate-700 hover:text-blue-600" %>
+          </p>
+          <% if @doctor.bio.present? %>
+            <p class="mt-4 max-w-2xl text-sm text-slate-600"><%= @doctor.bio %></p>
+          <% end %>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2 rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">📍</span>
+          <div>
+            <p class="font-semibold text-slate-800"><%= @doctor.clinic.name %></p>
+            <p><%= @doctor.clinic.address %></p>
+            <p class="text-xs text-slate-500">Call <%= @doctor.clinic.phone %></p>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-600">⏰</span>
+          <div>
+            <p class="font-semibold text-slate-800">Same-week availability</p>
+            <p>Most patients are seen within three days.</p>
+          </div>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section class="bg-white shadow rounded-xl p-6">
-    <h2 class="text-xl font-semibold text-slate-800 mb-4">Upcoming availability</h2>
-    <%= render partial: "time_slots/table", locals: { time_slots: @doctor.time_slots.available.ordered } %>
+  <section class="grid gap-6 lg:grid-cols-[minmax(0,380px),1fr]">
+    <div class="space-y-6">
+      <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <div class="hidden md:block" data-patient-calendar-target="calendar"></div>
+        <div class="md:hidden">
+          <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Select a date</h2>
+          <div class="mt-3 flex flex-wrap gap-2" data-patient-calendar-target="mobileList"></div>
+        </div>
+      </div>
+      <div class="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
+        <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-400">Selected date</h2>
+        <p class="mt-2 text-lg font-semibold text-slate-800" data-patient-calendar-target="dateLabel"></p>
+        <p class="mt-1 text-sm text-slate-500">Tap a time slot below to start booking.</p>
+      </div>
+    </div>
+
+    <div class="relative flex flex-col gap-4">
+      <%= turbo_frame_tag dom_id(@doctor, [:time_slots, @selected_date || Date.current]),
+                          src: doctor_time_slots_path(@doctor, date: @selected_date),
+                          loading: :lazy,
+                          data: { patient_calendar_target: "frame" } do %>
+        <div class="space-y-3">
+          <% 3.times do %>
+            <div class="h-20 animate-pulse rounded-xl border border-slate-200 bg-slate-100"></div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
   </section>
 </div>
+
+<div class="fixed inset-x-4 bottom-4 z-40 md:hidden">
+  <div class="rounded-full bg-white p-2 shadow-xl ring-1 ring-slate-200">
+    <%= link_to "View available times", "#", data: { action: "click->patient-calendar#scrollToSlots" },
+                class: "flex h-12 w-full items-center justify-center rounded-full bg-blue-600 text-sm font-semibold text-white" %>
+  </div>
+</div>
+
+

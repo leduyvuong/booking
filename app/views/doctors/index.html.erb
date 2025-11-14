@@ -1,10 +1,63 @@
-<h1 class="text-2xl font-semibold text-slate-800 mb-6">Doctors</h1>
-<div class="grid gap-6 md:grid-cols-2">
+<div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+  <div>
+    <h1 class="text-3xl font-semibold text-slate-900">Find your doctor</h1>
+    <p class="mt-2 text-sm text-slate-500">Browse our specialists and pick the right match for your visit.</p>
+  </div>
+  <%= form_with url: doctors_path, method: :get, local: true, class: "flex w-full items-center gap-3 md:w-auto" do %>
+    <div class="flex-1 md:w-64">
+      <label for="specialty" class="sr-only">Filter by specialty</label>
+      <select id="specialty" name="specialty" class="block w-full rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200">
+        <option value="">All specialties</option>
+        <% @specialties.each do |specialty| %>
+          <option value="<%= specialty %>" <%= "selected" if specialty == @selected_specialty %>><%= specialty %></option>
+        <% end %>
+      </select>
+    </div>
+    <button type="submit" class="inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition">
+      Apply
+    </button>
+  <% end %>
+</div>
+
+<div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
   <% @doctors.each do |doctor| %>
-    <div class="bg-white shadow rounded-xl p-6">
-      <h2 class="text-xl font-semibold text-slate-800"><%= link_to doctor.name, doctor, class: "hover:text-blue-600" %></h2>
-      <p class="text-slate-600"><%= doctor.specialty %></p>
-      <p class="mt-2 text-sm text-slate-500">Clinic: <%= doctor.clinic.name %></p>
+    <div class="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+      <div class="flex items-start gap-4">
+        <div class="relative h-14 w-14 flex-shrink-0 overflow-hidden rounded-full bg-blue-100">
+          <% if doctor.avatar_url.present? %>
+            <img src="<%= doctor.avatar_url %>" alt="<%= doctor.name %>" class="h-full w-full object-cover" />
+          <% else %>
+            <span class="flex h-full w-full items-center justify-center text-lg font-semibold text-blue-600"><%= doctor.name.split.map(&:first).join %></span>
+          <% end %>
+        </div>
+        <div class="space-y-1">
+          <h2 class="text-lg font-semibold text-slate-900">
+            <%= link_to doctor.name, doctor_path(doctor), class: "hover:text-blue-600" %>
+          </h2>
+          <p class="text-sm font-medium text-blue-600"><%= doctor.specialty %></p>
+          <p class="text-xs text-slate-500"><%= doctor.clinic.name %></p>
+        </div>
+      </div>
+      <% if doctor.bio.present? %>
+        <p class="mt-4 line-clamp-3 text-sm text-slate-600"><%= doctor.bio %></p>
+      <% end %>
+      <div class="mt-6 flex items-center justify-between">
+        <div class="text-xs font-medium uppercase tracking-wide text-slate-400">Next availability</div>
+        <% next_slot = doctor.time_slots.available.order(:date, :start_time).first %>
+        <% if next_slot %>
+          <div class="text-sm font-semibold text-slate-700">
+            <%= next_slot.date.strftime('%b %-d') %> · <%= next_slot.start_time.strftime('%-I:%M %p') %>
+          </div>
+        <% else %>
+          <div class="text-sm text-slate-400">Coming soon</div>
+        <% end %>
+      </div>
+      <%= link_to "View availability", doctor_path(doctor), class: "mt-4 inline-flex w-full items-center justify-center rounded-full bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-600 hover:bg-blue-100" %>
     </div>
   <% end %>
 </div>
+<% if @doctors.empty? %>
+  <div class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
+    No doctors match the selected specialty. Try a different filter.
+  </div>
+<% end %>
