@@ -21,19 +21,23 @@
               <span>Clinic Booking</span>
             <% end %>
           </div>
-          <div class="hidden md:flex space-x-6 text-sm font-medium text-slate-600">
-            <%= link_to "Clinics", clinics_path, class: "hover:text-blue-600 transition" %>
+          <div class="hidden md:flex items-center space-x-6 text-sm font-medium text-slate-600">
+            <%= link_to "Home", root_path, class: "hover:text-blue-600 transition" %>
             <%= link_to "Doctors", doctors_path, class: "hover:text-blue-600 transition" %>
-            <%= link_to "Appointments", appointments_path, class: "hover:text-blue-600 transition" %>
-          </div>
-          <div class="flex items-center space-x-4 text-sm">
+            <%= link_to "Clinics", clinics_path, class: "hover:text-blue-600 transition" %>
             <% if user_signed_in? %>
-              <div class="text-slate-700">
+              <%= link_to "My appointments", my_appointments_path, class: "hover:text-blue-600 transition" %>
+            <% end %>
+          </div>
+          <div class="flex items-center space-x-3 text-sm">
+            <%= link_to "Book now", doctors_path, class: "hidden md:inline-flex items-center justify-center rounded-full border border-blue-100 px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50" %>
+            <% if user_signed_in? %>
+              <div class="hidden sm:block text-slate-700">
                 Signed in as <span class="font-semibold"><%= current_user.email %></span>
               </div>
-              <%= button_to "Sign Out", destroy_user_session_path, method: :delete, class: "px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition" %>
+              <%= button_to "Sign out", destroy_user_session_path, method: :delete, class: "inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 font-semibold text-white shadow hover:bg-blue-700" %>
             <% else %>
-              <%= link_to "Sign In", new_user_session_path, class: "px-3 py-2 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition" %>
+              <%= link_to "Sign in", new_user_session_path, class: "inline-flex items-center justify-center rounded-full bg-blue-600 px-4 py-2 font-semibold text-white shadow hover:bg-blue-700" %>
             <% end %>
           </div>
         </nav>

@@ -9,7 +9,17 @@ Rails.application.routes.draw do
   resources :doctors, only: %i[index show] do
     resources :time_slots, only: %i[index]
   end
-  resources :appointments, only: %i[index show create update]
+
+  resources :appointments, only: %i[new create show] do
+    collection do
+      post :confirm
+    end
+    member do
+      patch :cancel
+    end
+  end
+
+  get "my-appointments", to: "patient/appointments#index", as: :my_appointments
 
   namespace :admin do
     root to: "dashboard#index"

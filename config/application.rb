@@ -11,5 +11,6 @@ module Booking
     config.load_defaults 7.1
     config.time_zone = "UTC"
     config.generators.system_tests = nil
+    config.autoload_paths << Rails.root.join("app/forms")
   end
 end

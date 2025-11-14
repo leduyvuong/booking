@@ -4,18 +4,21 @@ class Appointment < ApplicationRecord
   MAX_BOOKING_RETRIES = 3
 
   belongs_to :time_slot, counter_cache: :booked_count
-  belongs_to :patient, class_name: "User"
+  belongs_to :patient, class_name: "User", optional: true
 
   enum status: { pending: 0, confirmed: 1, cancelled: 2 }
 
+  attr_accessor :slot_will_be_full
+
   before_validation :assign_booking_number, on: :create
+  before_create :mark_slot_will_be_full
   after_commit :sync_time_slot_booked_count, on: %i[create update destroy]
+  after_commit :broadcast_slot_update, on: %i[create update destroy]
   before_save :clear_cancellation_reason_unless_cancelled
 
   validates :patient_name, :patient_phone, :patient_email, presence: true
   validates :patient_email, format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :time_slot, presence: true
-  validates :patient, presence: true
   validates :cancellation_reason, presence: true, if: :cancelled?
   validate :time_slot_available, on: :create
 
@@ -68,7 +71,19 @@ class Appointment < ApplicationRecord
     slot.update_columns(booked_count: count, updated_at: Time.current)
   end
 
+  def broadcast_slot_update
+    return unless time_slot
+
+    time_slot.broadcast_availability(just_booked: slot_will_be_full && !time_slot.bookable?)
+  end
+
   def clear_cancellation_reason_unless_cancelled
     self.cancellation_reason = nil unless cancelled?
+  end
+
+  def mark_slot_will_be_full
+    return unless time_slot
+
+    self.slot_will_be_full = time_slot.available_slots <= 1
   end
 end

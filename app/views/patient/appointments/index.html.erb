@@ -1,0 +1,92 @@
+<div class="space-y-8" data-controller="cancel-modal">
+  <div class="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+    <div>
+      <h1 class="text-3xl font-semibold text-slate-900">My appointments</h1>
+      <p class="mt-1 text-sm text-slate-500">Manage upcoming visits, review past care, and cancel if plans change.</p>
+    </div>
+    <div class="flex items-center gap-2 rounded-full border border-slate-200 bg-white p-1 shadow-sm">
+      <% %w[upcoming past cancelled].each do |filter| %>
+        <% active = @filter == filter %>
+        <%= link_to filter.titleize, my_appointments_path(filter: filter), class: [
+              "inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition",
+              active ? "bg-blue-600 text-white" : "text-slate-600 hover:text-blue-600"
+            ].join(" ") %>
+      <% end %>
+    </div>
+  </div>
+
+  <% if @appointments.empty? %>
+    <div class="rounded-3xl border border-dashed border-slate-300 bg-white p-10 text-center">
+      <p class="text-lg font-semibold text-slate-700">No <%= @filter %> appointments just yet.</p>
+      <p class="mt-2 text-sm text-slate-500">Book a visit with one of our specialists to see it appear here.</p>
+      <%= link_to "Browse doctors", doctors_path, class: "mt-6 inline-flex items-center justify-center rounded-full bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow hover:bg-blue-700" %>
+    </div>
+  <% else %>
+    <div class="space-y-4">
+      <% @appointments.each do |appointment| %>
+        <% slot = appointment.time_slot %>
+        <% doctor = slot.doctor %>
+        <% clinic = doctor.clinic %>
+        <% cancellable = appointment.status != "cancelled" && slot.start_at.future? %>
+        <% status_badge = case appointment.status
+                         when "confirmed" then "bg-emerald-100 text-emerald-700"
+                         when "pending" then "bg-amber-100 text-amber-700"
+                         else "bg-rose-100 text-rose-700"
+                         end %>
+        <div class="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div class="flex items-start gap-4">
+              <div class="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-base font-semibold text-blue-600">
+                <%= doctor.name.split.map(&:first).join %>
+              </div>
+              <div class="space-y-1 text-sm text-slate-600">
+                <p class="text-lg font-semibold text-slate-900"><%= doctor.name %></p>
+                <p class="font-medium text-blue-600"><%= doctor.specialty %></p>
+                <p><%= slot.date.strftime('%A, %B %-d') %> · <%= slot.start_time.strftime('%-I:%M %p') %></p>
+                <p class="text-xs text-slate-500">Booking #<%= appointment.booking_number %> · <%= clinic.name %></p>
+              </div>
+            </div>
+            <div class="flex flex-col items-start gap-3 md:items-end">
+              <span class="inline-flex items-center rounded-full px-4 py-1 text-xs font-semibold <%= status_badge %>"><%= appointment.status.humanize %></span>
+              <div class="flex flex-wrap gap-2">
+                <%= link_to "View details", appointment_path(appointment), class: "inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-blue-200 hover:text-blue-600" %>
+                <% if cancellable %>
+                  <%= link_to "Cancel", "#",
+                              class: "inline-flex items-center justify-center rounded-full bg-rose-100 px-4 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-200",
+                              data: {
+                                action: "cancel-modal#open",
+                                patient_name: doctor.name,
+                                cancel_url: cancel_appointment_path(appointment, filter: @filter)
+                              } %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/40 px-4" data-cancel-modal-target="modal">
+    <div class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-xl">
+      <div class="flex items-start justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-slate-900">Cancel appointment?</h2>
+          <p class="mt-1 text-sm text-slate-500">This will cancel your visit with <span data-cancel-modal-target="patientName" class="font-semibold text-slate-700"></span>.</p>
+        </div>
+        <button class="text-slate-400 hover:text-slate-600" data-action="cancel-modal#close">&times;</button>
+      </div>
+      <%= form_with scope: :appointment, url: "", method: :patch, data: { cancel_modal_target: "form" }, class: "mt-6 space-y-4" do |form| %>
+        <%= hidden_field_tag :filter, @filter %>
+        <div>
+          <%= form.label :cancellation_reason, "Share a quick note (optional)", class: "text-sm font-semibold text-slate-700" %>
+          <%= form.text_area :cancellation_reason, rows: 3, class: "mt-2 w-full rounded-xl border border-slate-200 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200" %>
+        </div>
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
+          <button type="button" class="inline-flex items-center justify-center rounded-full border border-slate-200 px-5 py-2 text-sm font-semibold text-slate-600 hover:border-blue-200 hover:text-blue-600" data-action="cancel-modal#close">Keep appointment</button>
+          <button type="submit" class="inline-flex items-center justify-center rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-rose-700">Confirm cancellation</button>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
